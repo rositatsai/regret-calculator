@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>遺憾計算器 - 量化你的人生體驗</title>
+    <style>
+        :root {
+            --primary-color: #4a6fa5;
+            --secondary-color: #e1e5ee;
+            --accent-color: #5e81ac;
+            --text-color: #2e3440;
+            --background-color: #f5f7fa;
+            --card-color: #ffffff;
+            --border-color: #d8dee9;
+            --shadow-color: rgba(46, 52, 64, 0.1);
+        }
+        
+        body {
+            font-family: "PingFang TC", "Microsoft JhengHei", sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+        
+        .subtitle {
+            font-style: italic;
+            color: #666;
+        }
+        
+        .card {
+            background-color: var(--card-color);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px var(--shadow-color);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+        
+        input[type="number"], select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="number"]:focus, select:focus {
+            border-color: var(--accent-color);
+            outline: none;
+        }
+        
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: var(--accent-color);
+        }
+        
+        .memory-container, .expectation-container {
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 1rem;
+        }
+        
+        .memory-entry, .expectation-entry {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 0.75rem;
+            align-items: center;
+        }
+        
+        .entry-group {
+            flex: 1;
+        }
+        
+        .btn-add {
+            background-color: #4caf50;
+            margin-top: 1rem;
+        }
+        
+        .btn-remove {
+            background-color: #f44336;
+            padding: 0.5rem;
+        }
+        
+        .result-card {
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .result-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin: 1rem 0;
+        }
+        
+        .result-message {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .interpretation {
+            text-align: left;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 1rem;
+        }
+        
+        .tab {
+            padding: 0.75rem 1.5rem;
+            background-color: var(--secondary-color);
+            border: none;
+            border-radius: 4px 4px 0 0;
+            margin-right: 0.5rem;
+            cursor: pointer;
+        }
+        
+        .tab.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .formula {
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-family: "PingFang TC", "Microsoft JhengHei", monospace;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .memory-entry, .expectation-entry {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>遺憾計算器</h1>
+            <div class="subtitle">量化你的過往快樂與未來期望之間的差距</div>
+        </header>
+        
+        <div class="card">
+            <div class="tabs">
+                <button class="tab active" onclick="changeTab(30)">30歲模型</button>
+                <button class="tab" onclick="changeTab(40)">40歲模型</button>
+                <button class="tab" onclick="changeTab(50)">50歲模型</button>
+            </div>
+            
+            <div class="formula">
+                <p>當前公式：<span id="current-formula">R<sub>30</sub> = (Σw<sub>i</sub>H<sub>i</sub> - Σp<sub>j</sub>E<sub>j</sub>) / 30</span></p>
+            </div>
+            
+            <div class="form-group">
+                <h3>過往快樂體驗</h3>
+                <div id="memories-container">
+                    <div class="memory-container">
+                        <div class="memory-entry">
+                            <div class="entry-group">
+                                <label>快樂值 (H<sub>i</sub>)</label>
+                                <input type="number" class="memory-happiness" min="0" max="10" step="0.1" placeholder="0-10" value="7">
+                            </div>
+                            <div class="entry-group">
+                                <label>記憶權重 (w<sub>i</sub>)</label>
+                                <input type="number" class="memory-weight" min="0" max="1" step="0.1" placeholder="0-1" value="0.8">
+                            </div>
+                            <button class="btn-remove" onclick="removeMemory(this)">✕</button>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn-add" onclick="addMemory()">+ 添加記憶</button>
+            </div>
+            
+            <div class="form-group">
+                <h3>未來期望</h3>
+                <div id="expectations-container">
+                    <div class="expectation-container">
+                        <div class="expectation-entry">
+                            <div class="entry-group">
+                                <label>期望快樂值 (E<sub>j</sub>)</label>
+                                <input type="number" class="expectation-happiness" min="0" max="10" step="0.1" placeholder="0-10" value="8">
+                            </div>
+                            <div class="entry-group">
+                                <label>實現概率 (p<sub>j</sub>)</label>
+                                <input type="number" class="expectation-probability" min="0" max="1" step="0.1" placeholder="0-1" value="0.6">
+                            </div>
+                            <button class="btn-remove" onclick="removeExpectation(this)">✕</button>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn-add" onclick="addExpectation()">+ 添加期望</button>
+            </div>
+            
+            <button onclick="calculateRegret()">計算遺憾值</button>
+        </div>
+        
+        <div class="card result-card" id="result-section" style="display: none;">
+            <h2>你的遺憾值</h2>
+            <div class="result-value" id="regret-value">0.00</div>
+            <div class="result-message" id="regret-message"></div>
+            
+            <div class="interpretation">
+                <h3>解讀你的遺憾值</h3>
+                <p>遺憾值代表過往快樂與未來期望之間的差距，按年齡標準化：</p>
+                <ul>
+                    <li><strong>正值：</strong> 過往的快樂大於未來的期望，可能表示懷舊或對未來不樂觀</li>
+                    <li><strong>負值：</strong> 未來的期望大於過往的快樂，可能表示樂觀或對過去不滿</li>
+                    <li><strong>接近零：</strong> 過往快樂與未來期望相近，表示心理平衡狀態</li>
+                </ul>
+                
+                <h4>遺憾程度參考範圍：</h4>
+                <ul>
+                    <li><strong>輕微遺憾/期望：</strong> ±0.05 到 ±0.1</li>
+                    <li><strong>中度遺憾/期望：</strong> ±0.1 到 ±0.2</li>
+                    <li><strong>強烈遺憾/期望：</strong> > ±0.2</li>
+                </ul>
+                
+                <p>遺憾絕對值越大，表示心理不平衡程度越高，可能需要調整對過往或未來的認知。</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentModel = 30;
+        
+        function changeTab(model) {
+            currentModel = model;
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById('current-formula').innerHTML = `R<sub>${model}</sub> = (Σw<sub>i</sub>H<sub>i</sub> - Σp<sub>j</sub>E<sub>j</sub>) / ${model}`;
+        }
+        
+        function addMemory() {
+            const container = document.createElement('div');
+            container.className = 'memory-container';
+            container.innerHTML = `
+                <div class="memory-entry">
+                    <div class="entry-group">
+                        <label>快樂值 (H<sub>i</sub>)</label>
+                        <input type="number" class="memory-happiness" min="0" max="10" step="0.1" placeholder="0-10" value="7">
+                    </div>
+                    <div class="entry-group">
+                        <label>記憶權重 (w<sub>i</sub>)</label>
+                        <input type="number" class="memory-weight" min="0" max="1" step="0.1" placeholder="0-1" value="0.8">
+                    </div>
+                    <button class="btn-remove" onclick="removeMemory(this)">✕</button>
+                </div>
+            `;
+            document.getElementById('memories-container').appendChild(container);
+        }
+        
+        function removeMemory(button) {
+            const container = button.closest('.memory-container');
+            if (document.querySelectorAll('.memory-container').length > 1) {
+                container.remove();
+            } else {
+                alert('至少需要保留一個記憶項');
+            }
+        }
+        
+        function addExpectation() {
+            const container = document.createElement('div');
+            container.className = 'expectation-container';
+            container.innerHTML = `
+                <div class="expectation-entry">
+                    <div class="entry-group">
+                        <label>期望快樂值 (E<sub>j</sub>)</label>
+                        <input type="number" class="expectation-happiness" min="0" max="10" step="0.1" placeholder="0-10" value="8">
+                    </div>
+                    <div class="entry-group">
+                        <label>實現概率 (p<sub>j</sub>)</label>
+                        <input type="number" class="expectation-probability" min="0" max="1" step="0.1" placeholder="0-1" value="0.6">
+                    </div>
+                    <button class="btn-remove" onclick="removeExpectation(this)">✕</button>
+                </div>
+            `;
+            document.getElementById('expectations-container').appendChild(container);
+        }
+        
+        function removeExpectation(button) {
+            const container = button.closest('.expectation-container');
+            if (document.querySelectorAll('.expectation-container').length > 1) {
+                container.remove();
+            } else {
+                alert('至少需要保留一個期望項');
+            }
+        }
+        
+        function calculateRegret() {
+            // 計算過往快樂總和
+            let pastHappinessSum = 0;
+            const memories = document.querySelectorAll('.memory-container');
+            memories.forEach(memory => {
+                const happiness = parseFloat(memory.querySelector('.memory-happiness').value) || 0;
+                const weight = parseFloat(memory.querySelector('.memory-weight').value) || 0;
+                pastHappinessSum += happiness * weight;
+            });
+            
+            // 計算未來期望總和
+            let futureExpectationSum = 0;
+            const expectations = document.querySelectorAll('.expectation-container');
+            expectations.forEach(expectation => {
+                const happiness = parseFloat(expectation.querySelector('.expectation-happiness').value) || 0;
+                const probability = parseFloat(expectation.querySelector('.expectation-probability').value) || 0;
+                futureExpectationSum += happiness * probability;
+            });
+            
+            // 計算遺憾值
+            const regretValue = (pastHappinessSum - futureExpectationSum) / currentModel;
+            
+            // 顯示結果
+            document.getElementById('regret-value').textContent = regretValue.toFixed(3);
+            
+            // 設置遺憾消息
+            let message = '';
+            if (regretValue > 0.1) {
+                message = '你的過往快樂高於未來期望，可能沉浸在美好的回憶中，對未來不抱太大期望。';
+            } else if (regretValue < -0.1) {
+                message = '你對未來的期望高於過往快樂，展現了樂觀態度，但可能對過去有些不滿。';
+            } else {
+                message = '你的過往快樂與未來期望大致平衡，處於心理平和的狀態。';
+            }
+            
+            document.getElementById('regret-message').textContent = message;
+            document.getElementById('result-section').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
